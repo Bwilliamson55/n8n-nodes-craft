@@ -91,7 +91,7 @@ export class CraftCms implements INodeType {
 
 						const responseData = await craftCmsGraphqlRequest.call(this, {
 							query: `
-									query entries($id: string!) {
+									query entries($id: [QueryArgument]!) {
 										entries(id: $id) {
 											id
 											enabled

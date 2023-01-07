@@ -48,11 +48,9 @@ export async function craftCmsApiRequest(
 		uri: `${url}${apiEndpoint}`,
 		json: true,
 	};
-	console.log(options)
 	try {
 		return this.helpers.request!.call(this, options);
 	} catch (error) {
-		console.log(error)
 		throw new NodeApiError(this.getNode(), error as JsonObject);
 	}
 }

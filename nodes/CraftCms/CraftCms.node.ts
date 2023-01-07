@@ -3,7 +3,6 @@ import {
 } from 'n8n-core';
 
 import {
-	IDataObject,
 	ILoadOptionsFunctions,
 	INodeExecutionData,
 	INodeType,
@@ -13,10 +12,6 @@ import {
 import { craftCmsApiTest, craftCmsGraphqlRequest, loadResource } from './GenericFunctions';
 
 import { entryFields, entryOperations } from './EntryDescription';
-
-import {
-	OptionsWithUri,
-} from 'request';
 
 export class CraftCms implements INodeType {
 	description: INodeTypeDescription = {
@@ -36,7 +31,7 @@ export class CraftCms implements INodeType {
 			{
 				name: 'craftCmsApi',
 				required: true,
-				// testedBy: 'craftCmsApiTest',
+				testedBy: 'craftCmsApiTest',
 			},
 		],
 		properties: [
@@ -96,8 +91,8 @@ export class CraftCms implements INodeType {
 
 						const responseData = await craftCmsGraphqlRequest.call(this, {
 							query: `
-									query entries($id: ID!){
-										entries(id: $id){
+									query entries($id: string!) {
+										entries(id: $id) {
 											id
 											enabled
 											slug
@@ -122,10 +117,10 @@ export class CraftCms implements INodeType {
 											url
 										}
 									}`,
-							operationName: 'entries',
 							variables: {
 								id: this.getNodeParameter('entryId', i),
 							},
+							operationName: 'entries',
 						});
 
 						const executionData = this.helpers.constructExecutionMetaData(
@@ -165,8 +160,7 @@ export class CraftCms implements INodeType {
 											uri
 											url
 											}
-										}
-									}`,
+										}`,
 							operationName: 'entries',
 						});
 

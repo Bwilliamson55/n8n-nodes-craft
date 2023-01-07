@@ -19,11 +19,18 @@ export class CraftCmsApi implements ICredentialType {
 			default: 'https://your-craft-site.com',
 		},
 		{
+			displayName: 'Endpoint',
+			name: 'apiEndpoint',
+			type: 'string',
+			typeOptions: { password: false },
+			default: '/graphql',
+		},
+		{
 			displayName: 'API Key',
 			name: 'apiKey',
 			type: 'string',
 			typeOptions: { password: true },
-			default: 'Bearer 123supersecretkey',
+			default: '123supersecretkey',
 		},
 	];
 
@@ -32,6 +39,7 @@ export class CraftCmsApi implements ICredentialType {
 		properties: {
 			headers: {
 				Authorization: '=Bearer {{$credentials.apiKey}}',
+				"Content-Type": 'application/json'
 			},
 		},
 	};
@@ -39,7 +47,7 @@ export class CraftCmsApi implements ICredentialType {
 	test: ICredentialTestRequest = {
 		request: {
 			baseURL: '={{$credentials?.url}}',
-			url: '/graphql',
+			url: '={{$credentials?.endpoint}}',
 		},
 	};
 }

@@ -17,7 +17,7 @@ export async function craftCmsGraphqlRequest(
 	this: IExecuteFunctions | ILoadOptionsFunctions,
 	body: object = {},
 ) {
-	const response = await craftCmsApiRequest.call(this, 'POST', '/graphql', body);
+	const response = await craftCmsApiRequest.call(this, 'POST', body);
 
 	if (response.errors) {
 		throw new NodeApiError(this.getNode(), response);
@@ -32,27 +32,27 @@ export async function craftCmsGraphqlRequest(
 export async function craftCmsApiRequest(
 	this: IExecuteFunctions | ILoadOptionsFunctions | IHookFunctions,
 	method: string,
-	endpoint: string,
 	body: object = {},
 	qs: object = {},
 ) {
-	const { apiKey } = (await this.getCredentials('emeliaApi')) as { apiKey: string };
-	const { apiUrl } = (await this.getCredentials('url')) as { apiUrl: string };
+	const { url, apiEndpoint, apiKey } = (await this.getCredentials('craftCmsApi')) as { url: string; apiEndpoint: string; apiKey: string };
 
 	const options = {
 		headers: {
-			Authorization: apiKey,
+			Authorization: `Bearer ${apiKey}`,
+			"Content-Type": 'application/json',
 		},
 		method,
 		body,
 		qs,
-		uri: `${apiUrl}${endpoint}`,
+		uri: `${url}${apiEndpoint}`,
 		json: true,
 	};
-
+	console.log(options)
 	try {
 		return this.helpers.request!.call(this, options);
 	} catch (error) {
+		console.log(error)
 		throw new NodeApiError(this.getNode(), error as JsonObject);
 	}
 }
@@ -116,7 +116,7 @@ export async function craftCmsApiTest(
 
 	const options = {
 		headers: {
-			Authorization: credentials?.apiKey,
+			Authorization: `Bearer ${credentials?.apiKey}`,
 		},
 		method: 'POST',
 		body,

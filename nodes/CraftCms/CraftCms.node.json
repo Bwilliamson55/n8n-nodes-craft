@@ -1,0 +1,20 @@
+{
+	"node": "n8n-nodes-base.CraftCms",
+	"nodeVersion": "1.0",
+	"codexVersion": "1.0",
+	"categories": [
+		"Miscellaneous"
+	],
+	"resources": {
+		"credentialDocumentation": [
+			{
+				"url": "https://github.com/Bwilliamson55/n8n-nodes-craft"
+			}
+		],
+		"primaryDocumentation": [
+			{
+				"url": "https://github.com/Bwilliamson55/n8n-nodes-craft"
+			}
+		]
+	}
+}

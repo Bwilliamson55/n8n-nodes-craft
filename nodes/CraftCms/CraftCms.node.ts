@@ -5,11 +5,18 @@ import {
 import {
 	ILoadOptionsFunctions,
 	INodeExecutionData,
+	INodePropertyOptions,
 	INodeType,
 	INodeTypeDescription,
 } from 'n8n-workflow';
 
-import { craftCmsApiTest, craftCmsGraphqlRequest, loadResource } from './GenericFunctions';
+import {
+	craftCmsApiTest,
+	craftCmsGraphqlRequest,
+	loadResource,
+	getGraphqlQuerySchemaOptions,
+	getGraphqlQuerySchemaFields,
+} from './GenericFunctions';
 
 import { entryFields, entryOperations } from './EntryDescription';
 
@@ -67,6 +74,17 @@ export class CraftCms implements INodeType {
 			async getEntries(this: ILoadOptionsFunctions) {
 				return loadResource.call(this, 'entry');
 			},
+			// Get all the queryable entry fields to display them to the user to select them easily
+			async getAdditionalFieldParents(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
+				const types = await getGraphqlQuerySchemaOptions.call(this);
+				return types;
+			},
+			// Get all fields available to return in said query type
+			async getAdditionalFields(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
+				const interfaceName = this.getCurrentNodeParameter('typeKey') as string;
+				const fields = await getGraphqlQuerySchemaFields.call(this, interfaceName);
+				return fields;
+			},
 		},
 	};
 
@@ -95,26 +113,8 @@ export class CraftCms implements INodeType {
 										entries(id: $id) {
 											id
 											enabled
-											slug
 											status
 											title
-											canonicalId
-											dateCreated
-											dateUpdated
-											author {
-												fullName
-												email
-											}
-											authorId
-											postDate
-											sectionHandle
-											sectionId
-											siteHandle
-											siteId
-											typeId
-											uid
-											uri
-											url
 										}
 									}`,
 							variables: {
@@ -139,26 +139,8 @@ export class CraftCms implements INodeType {
 										entries {
 											id
 											enabled
-											slug
 											status
 											title
-											canonicalId
-											dateCreated
-											dateUpdated
-											author {
-												fullName
-												email
-											}
-											authorId
-											postDate
-											sectionHandle
-											sectionId
-											siteHandle
-											siteId
-											typeId
-											uid
-											uri
-											url
 											}
 										}`,
 							operationName: 'entries',

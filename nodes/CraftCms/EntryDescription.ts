@@ -73,6 +73,41 @@ export const entryFields: INodeProperties[] = [
 			},
 		},
 	},
+	{
+		displayName: 'Type Name or ID',
+		name: 'typeKey',
+		type: 'options',
+		typeOptions: {
+			loadOptionsMethod: 'getAdditionalFieldParents',
+		},
+		displayOptions: {
+			show: {
+				resource: ['entry'],
+				operation: ['get'],
+			},
+		},
+		default: '',
+		description:
+			'The ID of the query type to retreive fields from. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code-examples/expressions/">expression</a>.',
+	},
+	{
+		displayName: 'Additional Return Fields',
+		name: 'fieldListUi',
+		type: 'multiOptions',
+		description:
+			'Choose from the list, or specify IDs using an <a href="https://docs.n8n.io/code-examples/expressions/">expression</a>',
+		displayOptions: {
+			show: {
+				resource: ['entry'],
+				operation: ['get'],
+			},
+		},
+		typeOptions: {
+			loadOptionsMethod: 'getAdditionalFields',
+			loadOptionsDependsOn: ['typeKey'],
+		},
+		default: [],
+	},
 
 	// ----------------------------------
 	//       entry: getAll

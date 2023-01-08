@@ -10,6 +10,85 @@ import {
 	NodeApiError,
 } from 'n8n-workflow';
 
+import {
+	// getFullSchema,
+	getSchemaName,
+} from './queries'
+
+import {search} from 'jmespath';
+
+/**
+ * Get the GraphQL Schema
+ */
+export async function getGraphqlSchema(
+	this: IExecuteFunctions | ILoadOptionsFunctions,
+	schemaName: String = '',
+) {
+	const body = {
+		query: getSchemaName,
+		variables: {name: schemaName},
+		operationName: 'getSchemaName',
+	};
+
+	const response = await craftCmsApiRequest.call(this, 'POST', body);
+	if (response.errors) {
+		throw new NodeApiError(this.getNode(), response);
+	}
+
+	return response;
+}
+
+/**
+ * Get the types of queries available
+ */
+export async function getGraphqlQuerySchemaOptions(
+	this: IExecuteFunctions | ILoadOptionsFunctions,
+): Promise<INodePropertyOptions[]> {
+	const schema = await getGraphqlSchema.call(this, 'Query');
+	const queryOptions = search(schema, '@.data.__type.fields[?type.kind==`INTERFACE`].{name: name, type: type.name}')
+	const returnData: INodePropertyOptions[] = [];
+	for (const option of queryOptions) {
+		const optionName = option.name;
+		const optionId = option.type;
+		returnData.push({
+			name: optionName,
+			value: optionId,
+		});
+	}
+	returnData.sort((a, b) => {
+		if (a.name.toLocaleLowerCase() < b.name.toLocaleLowerCase()) {
+			return -1;
+		}
+		if (a.name.toLocaleLowerCase() > b.name.toLocaleLowerCase()) {
+			return 1;
+		}
+		return 0;
+	});
+	return returnData;
+}
+
+/**
+ * Get the types of queries available
+ */
+export async function getGraphqlQuerySchemaFields(
+	this: IExecuteFunctions | ILoadOptionsFunctions,
+	querySchemaName: String = 'EntryInterface'
+) {
+	const schema = await getGraphqlSchema.call(this, querySchemaName);
+	const queryOptions = search(schema, '@.data.__type.fields[].name')
+	queryOptions.sort();
+	const returnData: INodePropertyOptions[] = [];
+	for (const option of queryOptions) {
+		const optionName = option;
+		const optionId = option;
+		returnData.push({
+			name: optionName,
+			value: optionId,
+		});
+	}
+	return returnData;
+}
+
 /**
  * Make an authenticated GraphQL request to Craft CMs.
  */
@@ -40,7 +119,6 @@ export async function craftCmsApiRequest(
 	const options = {
 		headers: {
 			Authorization: `Bearer ${apiKey}`,
-			"Content-Type": 'application/json',
 		},
 		method,
 		body,
@@ -49,7 +127,8 @@ export async function craftCmsApiRequest(
 		json: true,
 	};
 	try {
-		return this.helpers.request!.call(this, options);
+		 let response = await this.helpers.request!(options);
+		 return response
 	} catch (error) {
 		throw new NodeApiError(this.getNode(), error as JsonObject);
 	}
